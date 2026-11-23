@@ -1,5 +1,6 @@
 import assertString from './util/assertString';
 import checkHost from './util/checkHost';
+import escapeCharClass from './util/escapeCharClass';
 
 import isByteLength from './isByteLength';
 import isFQDN from './isFQDN';
@@ -163,7 +164,7 @@ export default function isEmail(str, options) {
   }
 
   if (options.blacklisted_chars) {
-    if (user.search(new RegExp(`[${options.blacklisted_chars}]+`, 'g')) !== -1) return false;
+    if (user.search(new RegExp(`[${escapeCharClass(options.blacklisted_chars)}]+`, 'g')) !== -1) return false;
   }
 
   if (user[0] === '"' && user[user.length - 1] === '"') {

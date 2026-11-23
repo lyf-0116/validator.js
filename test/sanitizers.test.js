@@ -261,6 +261,63 @@ describe('Sanitizers', () => {
     });
   });
 
+  it('should treat a closing square bracket or trailing backslash in the blacklist as literal characters', () => {
+    test({
+      sanitizer: 'blacklist',
+      args: [']'],
+      expect: {
+        'a]b': 'ab',
+        ']]]': '',
+      },
+    });
+
+    test({
+      sanitizer: 'blacklist',
+      args: ['\\'],
+      expect: {
+        'a\\b': 'ab',
+        '\\': '',
+      },
+    });
+  });
+
+  it('should treat a closing square bracket or trailing backslash in the whitelist as literal characters', () => {
+    test({
+      sanitizer: 'whitelist',
+      args: [']'],
+      expect: {
+        'a]b': ']',
+        ']]]': ']]]',
+      },
+    });
+
+    test({
+      sanitizer: 'whitelist',
+      args: ['\\'],
+      expect: {
+        'a\\b': '\\',
+      },
+    });
+  });
+
+  it('should keep stripping control characters through the internal blacklist range', () => {
+    test({
+      sanitizer: 'stripLow',
+      expect: {
+        'foo\x00': 'foo',
+        '\x7Ffoo\x02': 'foo',
+      },
+    });
+
+    test({
+      sanitizer: 'stripLow',
+      args: [true],
+      expect: {
+        'foo\x0A\x0D': 'foo\x0A\x0D',
+      },
+    });
+  });
+
   it('should score passwords', () => {
     test({
       sanitizer: 'isStrongPassword',

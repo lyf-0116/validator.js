@@ -1,6 +1,8 @@
 import assertString from './util/assertString';
+import escapeCharClass from './util/escapeCharClass';
 
-export default function blacklist(str, chars) {
+export default function blacklist(str, chars, { isEscaped = false } = {}) {
   assertString(str);
-  return str.replace(new RegExp(`[${chars}]+`, 'g'), '');
+  const escapedChars = isEscaped ? chars : escapeCharClass(chars);
+  return str.replace(new RegExp(`[${escapedChars}]+`, 'g'), '');
 }

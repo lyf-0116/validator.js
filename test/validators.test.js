@@ -280,6 +280,33 @@ describe('Validators', () => {
     });
   });
 
+  it('should treat a closing square bracket in blacklisted_chars as a literal character', () => {
+    test({
+      validator: 'isEmail',
+      args: [{ blacklisted_chars: '#]' }],
+      valid: [
+        'foobar@gmail.com',
+      ],
+      invalid: [
+        'foo#bar@gmail.com',
+        'foo]bar@gmail.com',
+      ],
+    });
+  });
+
+  it('should treat a trailing backslash in blacklisted_chars as a literal character', () => {
+    test({
+      validator: 'isEmail',
+      args: [{ blacklisted_chars: '\\' }],
+      valid: [
+        'foo@gmail.com',
+      ],
+      invalid: [
+        'foo\\bar@gmail.com',
+      ],
+    });
+  });
+
 
   it('should validate really long emails if ignore_max_length is set', () => {
     test({
