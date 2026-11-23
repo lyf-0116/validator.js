@@ -918,6 +918,58 @@ describe('Validators', () => {
     });
   });
 
+  it('should normalize hosts before matching host blacklists and whitelists', () => {
+    test({
+      validator: 'isURL',
+      args: [{ host_blacklist: ['example.com'] }],
+      valid: [
+        'http://example.org/',
+      ],
+      invalid: [
+        'http://example.com/',
+        'http://EXAMPLE.COM/',
+        'http://Example.Com/',
+      ],
+    });
+
+    test({
+      validator: 'isURL',
+      args: [{ host_blacklist: ['example.com'], allow_trailing_dot: true }],
+      invalid: [
+        'http://example.com./',
+      ],
+    });
+
+    test({
+      validator: 'isURL',
+      args: [{ host_whitelist: ['example.com'] }],
+      valid: [
+        'http://example.com/',
+        'http://EXAMPLE.COM/',
+      ],
+      invalid: [
+        'http://example.org/',
+      ],
+    });
+
+    test({
+      validator: 'isEmail',
+      args: [{ host_blacklist: ['example.com'] }],
+      valid: [
+        'foo@example.org',
+      ],
+      invalid: [
+        'foo@example.com',
+        'foo@EXAMPLE.COM',
+      ],
+    });
+
+    // A regex with the global flag must not leak lastIndex state between calls
+    const globalPattern = /^example\.com$/g;
+    assert.strictEqual(validator.isURL('http://example.com/', { host_blacklist: [globalPattern] }), false);
+    assert.strictEqual(validator.isURL('http://example.com/', { host_blacklist: [globalPattern] }), false);
+  });
+
   it('GHSA-9965-vmph-33xx vulnerability - protocol delimiter parsing difference', () => {
     const DOMAIN_WHITELIST = ['example.com'];
 
