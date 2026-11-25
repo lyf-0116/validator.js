@@ -22,7 +22,9 @@ host_blacklist - if set to an array of strings or regexp, and the domain matches
                  defined in it, the validation fails.
 allow_trailing_dot - if set to true, the validator will allow the domain to end with
                      a `.` character.
-allow_protocol_relative_urls - if set to true protocol relative URLs will be allowed.
+allow_protocol_relative_urls - if set to true protocol relative URLs will be allowed when
+                               protocol is not required. These include URLs starting with `//`
+                               and the browser-equivalent backslash forms.
 allow_fragments - if set to false isURL will return false if fragments are present.
 allow_query_components - if set to false isURL will return false if query components are present.
 disallow_auth - if set to true, the validator will fail if the URL contains an authentication
@@ -180,14 +182,18 @@ export default function isURL(url, options) {
     return false;
   }
 
-  // Handle leading '//' only as protocol-relative when there was NO explicit protocol.
-  // If there was an explicit protocol, '//' is the normal separator
-  // and should be stripped unconditionally.
-  if (url.slice(0, 2) === '//') {
-    if (!had_explicit_protocol && !options.allow_protocol_relative_urls) {
+  // Browsers treat `//`, `\\`, `/\`, and `\/` as protocol-relative URL prefixes.
+  const starts_with_protocol_relative_url = !had_explicit_protocol
+    && /^(?:\/\/|\\\\|\/\\|\\\/)/.test(url);
+
+  if (starts_with_protocol_relative_url) {
+    if (!options.allow_protocol_relative_urls) {
       return false;
     }
 
+    url = url.slice(2);
+  } else if (had_explicit_protocol && url.slice(0, 2) === '//') {
+    // After an explicit protocol, '//' is the normal separator.
     url = url.slice(2);
   }
 

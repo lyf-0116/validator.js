@@ -701,6 +701,9 @@ describe('Validators', () => {
       }],
       valid: [
         '//foobar.com',
+        '\\\\foobar.com',
+        '/\\foobar.com',
+        '\\/foobar.com',
         'http://foobar.com',
         'foobar.com',
       ],
@@ -709,6 +712,27 @@ describe('Validators', () => {
         '/foobar.com',
         '////foobar.com',
         'http:////foobar.com',
+      ],
+    });
+  });
+
+  it('should reject protocol relative URLs when protocol is optional', () => {
+    test({
+      validator: 'isURL',
+      args: [{
+        require_protocol: false,
+        allow_protocol_relative_urls: false,
+      }],
+      valid: [
+        'foobar.com',
+        'user:pw@foobar.com/',
+      ],
+      invalid: [
+        '//foobar.com',
+        '\\\\@foobar.com',
+        '\\\\user@foobar.com',
+        '/\\@foobar.com',
+        '\\/@foobar.com',
       ],
     });
   });
